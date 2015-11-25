@@ -210,12 +210,14 @@ class mod_peerform_renderer extends plugin_renderer_base {
 
         // Heading.
         if ($review) {
+            echo '<div class="peerform_review">';
             if ($ownsubmission) {
                 echo "<h3>" . get_string('myreview', 'peerform') . "</h3>";
             } else {
                 echo "<h3>" . get_string('reviewby', 'peerform', fullname($user)) . "</h3>";
             }
         } else {
+            echo '<div class="peerform_submission">';
             if ($ownsubmission) {
                 echo "<h3>" . get_string('mysubmission', 'peerform') . "</h3>";
             } else {
@@ -274,6 +276,8 @@ class mod_peerform_renderer extends plugin_renderer_base {
                 echo "<p><a class=\"btn btn-info\" href=\"$editlink\" role=\"button\">" .
                     get_string('editreview', 'peerform') . "</a></p>";
         }
+
+        echo "</div>";
     }
 
     /**
@@ -383,20 +387,20 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * @param int $courseid
      * @return string link html
      */
-     private function userlink($userid, $courseid) {
-         global $DB, $USER;
+    private function userlink($userid, $courseid) {
+        global $DB, $USER;
 
-         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
-         $userlink = new moodle_url('/user/profile.php', array('id' => $user->id, 'course' => $courseid));
-         if ($userid == $USER->id) {
-             $username = get_string('me', 'peerform');
-         } else {
-             $username = fullname($user);
-         }
-         $userhtml = "<a href=\"$userlink\">$username</a>";
-     
-         return $userhtml;
-     }
+        $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+        $userlink = new moodle_url('/user/profile.php', array('id' => $user->id, 'course' => $courseid));
+        if ($userid == $USER->id) {
+            $username = get_string('me', 'peerform');
+        } else {
+            $username = fullname($user);
+        }
+        $userhtml = "<a href=\"$userlink\">$username</a>";
+
+        return $userhtml;
+    }
 
     /**
      * Show table of all reviews
@@ -556,5 +560,5 @@ class mod_peerform_renderer extends plugin_renderer_base {
         $cancellink = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => 'submit'));
         echo '&nbsp;<a class="btn btn-warning" href="' . $cancellink . '">' . get_string('skip', 'peerform') . '</a>';
         echo '</div>';
-    } 
+    }
 }

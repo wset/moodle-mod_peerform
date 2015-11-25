@@ -218,6 +218,52 @@ function peerform_user_outline($course, $user, $mod, $peerform) {
  * @return void, is supposed to echp directly
  */
 function peerform_user_complete($course, $user, $mod, $peerform) {
+    global $DB, $CFG, $OUTPUT, $PAGE;
+
+    require_once("$CFG->libdir/gradelib.php");
+    $grades = grade_get_grades($course->id, 'mod', 'peerform', $peerform->id, $user->id);
+    if (!empty($grades->items[0]->grades)) {
+        $grade = reset($grades->items[0]->grades);
+        if ($grade != '-') {
+            echo $OUTPUT->container(get_string('grade').': '.$grade->str_long_grade);
+            if ($grade->str_feedback) {
+                echo $OUTPUT->container(get_string('feedback').': '.$grade->str_feedback);
+            }
+        }
+    }
+
+    require_once(dirname(__FILE__).'/locallib.php');
+    $context = context_module::instance($mod->id);
+    $output = $PAGE->get_renderer('mod_peerform');
+
+    // Get Submissions.
+    echo '<div class="peerform_submissions">';
+    echo "<h5>" . get_string('submissions', 'peerform') . "</h5>";
+    $submissions = peerformlib::mysubmissions($peerform->id, $user->id);
+    if (!empty($submissions)) {
+        foreach ($submissions as $submission) {
+            $output->viewsubmission($peerform->id, $submission->id, $context);
+        }
+    } else {
+        echo '<p>' . get_string('nosubmissions', 'peerform') . '</p>';
+    }
+    echo '</div>';
+
+    echo '<div class="peerform_reviews">';
+    // Get Reviews.
+    echo "<h5>" . get_string('reviews', 'peerform') . "</h5>";
+    $reviews = peerformlib::myreviews($peerform->id, $user->id);
+    if (!empty($reviews)) {
+        foreach ($reviews as $review) {
+            echo '<div class="peerform_subrev">';
+            $output->viewsubmission($peerform->id, $review->parentid, $context);
+            $output->viewsubmission($peerform->id, $review->id, $context);
+            echo '</div>';
+        }
+    } else {
+        echo '<p>' . get_string('noreviewsoverall', 'peerform') . '</p>';
+    }
+    echo '</div>';
 }
 
 /**

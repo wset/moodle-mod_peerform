@@ -134,8 +134,8 @@ if ($mform->is_cancelled()) {
     if ($review) {
         redirect(new moodle_url('/mod/peerform/view.php', array('id' => $cm->id, 'tab' => 'all', 'submission' => $parentid)));
     } else {
-   
-        // If this was a new submission they have the option to review (themselves) immediately
+
+        // If this was a new submission they have the option to review (themselves) immediately.
         if ($newsubmission && $peerform->reviewself) {
             echo $OUTPUT->header();
             $output->confirmreview($cm->id, $peerform->id, $submissionid);

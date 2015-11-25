@@ -114,7 +114,7 @@ class peerformlib {
 
         $reviews = $DB->get_records('peerform_submission', array('peerformid' => $peerformid, 'review' => 1), 'modified DESC');
 
-        // We do not want ones with locked parents
+        // We do not want ones with locked parents.
         $filteredreviews = array();
         foreach ($reviews as $id => $review) {
             $parent = $DB->get_record('peerform_submission', array('id' => $review->parentid), '*', MUST_EXIST);
@@ -122,20 +122,25 @@ class peerformlib {
                 $filteredreviews[$id] = $review;
             }
         }
-   
+
         return $filteredreviews;
     }
 
     /**
      * Get submissions made by current user
      * @param int $peerformid
+     * @param int $userid
      * @return array
      */
-    public static function mysubmissions($peerformid) {
+    public static function mysubmissions($peerformid, $userid = null) {
         global $DB, $USER;
 
+        if (!$userid) {
+            $userid = $USER->id;
+        }
+
         $submissions = $DB->get_records('peerform_submission',
-            array('peerformid' => $peerformid, 'userid' => $USER->id, 'review' => 0));
+            array('peerformid' => $peerformid, 'userid' => $userid, 'review' => 0));
 
         // Add in review counts.
         foreach ($submissions as $submission) {
@@ -145,6 +150,26 @@ class peerformlib {
 
         return $submissions;
     }
+
+    /**
+     * Get reviews made by current user
+     * @param int $peerformid
+     * @param int $userid
+     * @return array
+     */
+    public static function myreviews($peerformid, $userid = null) {
+        global $DB, $USER;
+
+        if (!$userid) {
+            $userid = $USER->id;
+        }
+
+        $reviews = $DB->get_records('peerform_submission',
+            array('peerformid' => $peerformid, 'userid' => $userid, 'review' => 1));
+
+        return $reviews;
+    }
+
 
     /**
      * Has the current user reviewed the submission

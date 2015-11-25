@@ -1,0 +1,7 @@
+#page-report-outline-user .peerform_subrev .peerform_submission h3 {
+    font-size: inherit;
+}
+
+#page-report-outline-user .peerform_submissions .peerform_submission h3, #page-report-outline-user .peerform_reviews .peerform_review h3 {
+    display: none;
+}

@@ -123,7 +123,7 @@ if (($tab == 'define') && has_capability('mod/peerform:addinstance', $context)) 
 // TAB == SUBMIT
 // Show option to submit (or edit) form to 'students'.
 if (($tab == 'submit') && has_capability('mod/peerform:submit', $context)) {
-    $submissions = peerformlib::mysubmissions($peerform->id);
+    $submissions = peerformlib::mysubmissions($peerform->id, $USER->id);
     if ($submissionid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         if ($reviewid) {
@@ -152,7 +152,8 @@ if (($tab == 'all') && (has_capability('mod/peerform:review', $context) || has_c
             $output->backtosubmissionreviews($cm->id, $submissionid);
         } else {
             $output->reviews($cm->id, $course->id, $peerform->id, $submissionid, $context);
-            if (($submission->locked && has_capability('mod/peerform:review', $context)) || peerformlib::userownssubmission($submissionid)) {
+            if (($submission->locked && has_capability('mod/peerform:review', $context))
+                    || peerformlib::userownssubmission($submissionid)) {
                 $output->submitreviewlink($peerform->id, $submissionid);
             }
             $output->backtoreviews($cm->id, $page);
@@ -164,7 +165,7 @@ if (($tab == 'all') && (has_capability('mod/peerform:review', $context) || has_c
 }
 
 // TAB = REVIEW
-// Show latest reviews
+// Show latest reviews.
 if (($tab == 'reviews') && (has_capability('mod/peerform:review', $context) || has_capability('mod/peerform:comment', $context))) {
     if ($submissionid && $reviewid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
