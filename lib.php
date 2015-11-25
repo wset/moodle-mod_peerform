@@ -131,11 +131,80 @@ function peerform_delete_instance($id) {
  * @return stdClass|null
  */
 function peerform_user_outline($course, $user, $mod, $peerform) {
+    global $DB, $CFG;
 
-    $return = new stdClass();
-    $return->time = 0;
-    $return->info = '';
-    return $return;
+    // Get user grades.
+    require_once("$CFG->libdir/gradelib.php");
+    $grades = grade_get_grades($course->id, 'mod', 'peerform', $peerform->id, $user->id);
+    if (empty($grades->items[0]->grades)) {
+        $grade = false;
+    } else {
+        $grade = reset($grades->items[0]->grades);
+        if ($grade->str_grade == '-') {
+            $grade = false;
+        }
+    }
+
+    $params = array(
+        'peerformid' => $peerform->id,
+        'userid' => $user->id
+    );
+
+    // Get submissions for current user.
+    $sql = "SELECT peerformid, modified FROM {peerform_submission} ps ".
+            "WHERE ps.peerformid = :peerformid ".
+            "AND ps.userid = :userid ".
+            "AND ps.review = 0 ".
+            "ORDER BY modified ASC ";
+
+    $submissions = $DB->get_records_sql($sql, $params);
+
+    $rsql = "SELECT peerformid, modified FROM {peerform_submission} ps ".
+            "WHERE ps.peerformid = :peerformid ".
+            "AND ps.userid = :userid ".
+            "AND ps.review = 1 ".
+            "ORDER BY modified ASC ";
+
+    $reviews = $DB->get_records_sql($rsql, $params);
+
+    $result = null;
+
+    if (!empty($submissions)) {
+        $result = new stdClass();
+        $result->info = get_string('numsubmissions', 'peerform', count($submissions));
+        $lastsubtime = end($submissions)->modified;
+
+        $lastreviewtime = 0;
+        if (!empty($reviews)) {
+            $result->info .= ", " . get_string('numreviews', 'peerform', count($reviews));
+            $lastreviewtime = end($reviews)->modified;
+        }
+
+        $result->time = max($lastsubtime, $lastreviewtime);
+
+        if ($grade) {
+            $result->info .= ', ' . get_string('grade') . ': ' . $grade->str_long_grade;
+        }
+    } else if (!empty($reviews)) {
+        $result = new stdClass();
+        $result->info = get_string('numreviews', 'peerform', count($reviews));
+        $result->time = end($reviews)->modified;
+
+        if ($grade) {
+            $result->info .= ', ' . get_string('grade') . ': ' . $grade->str_long_grade;
+        }
+    } else if ($grade) {
+        $result = new stdClass();
+        $result->info = get_string('grade') . ': ' . $grade->str_long_grade;
+        // If grade was last modified by the user themselves use date graded. Otherwise use date submitted.
+        if ($grade->usermodified == $user->id || empty($grade->datesubmitted)) {
+            $result->time = $grade->dategraded;
+        } else {
+            $result->time = $grade->datesubmitted;
+        }
+    }
+
+    return $result;
 }
 
 /**
