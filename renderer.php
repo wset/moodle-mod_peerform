@@ -191,7 +191,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * @param object $context
      */
     public function viewsubmission($peerformid, $submissionid, $context, $page = 0) {
-        global $DB, $USER, $OUTPUT;
+        global $DB, $USER, $OUTPUT, $CFG;
 
         // Basic data.
         $submission = $DB->get_record('peerform_submission', array('id' => $submissionid), '*', MUST_EXIST);
@@ -247,18 +247,24 @@ class mod_peerform_renderer extends plugin_renderer_base {
         }
 
         // Display comment if there is one.
-        if ($submission->locked && ($submission->comment || has_capability('mod/peerform:comment', $context))) {
-            $commenthtml = '';
-            if (has_capability('mod/peerform:comment', $context)) {
-                $commentlink = new moodle_url('/mod/peerform/comment.php',
-                    array('id' => $peerformid, 'submission' => $submission->id, 'page' => $page));
-                $commenthtml = "<a class=\"btn btn-info\" href=\"$commentlink\" role=\"button\">" .
-                    get_string('editcomment', 'peerform') . "</a>";
-            }
-            $table->data[] = array(
+        require_once($CFG->dirroot  . '/comment/lib.php');
+        if ($submission->locked) {
+            if (!empty($CFG->usecomments)) {
+                list($thiscontext, $course, $cm) = get_context_info_array($context->id);
+                $cmt = new stdClass();
+                $cmt->context = $thiscontext;
+                $cmt->course  = $course;
+                $cmt->cm      = $cm;
+                $cmt->area    = 'peerform_submission';
+                $cmt->itemid  = $submission->id;
+                $cmt->showcount = true;
+                $cmt->component = 'mod_peerform';
+                $comment = new comment($cmt);
+                $table->data[] = array(
                 '<small class="text-info"><strong>' . get_string('tutorcomment', 'peerform') . '</strong></small>',
-                $submission->comment . $commenthtml,
-            );
+                    $comment->output(true),
+                );
+            }
         }
 
         echo html_writer::table($table);

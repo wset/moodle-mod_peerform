@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$module->version   = 2015021800;
+$module->version   = 2015112600;
 $module->requires  = 2014051200;
 $module->cron      = 1;
 $module->component = 'mod_peerform';

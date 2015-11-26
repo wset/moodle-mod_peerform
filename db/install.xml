@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/newmodule/db" VERSION="20150218" COMMENT="XMLDB file for Moodle mod/newmodule"
+<XMLDB PATH="mod/newmodule/db" VERSION="20151126" COMMENT="XMLDB file for Moodle mod/newmodule"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -45,7 +45,6 @@
         <FIELD NAME="review" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1=review, 0=submission"/>
         <FIELD NAME="locked" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = locked for editing"/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="time last modified"/>
-        <FIELD NAME="comment" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="teacher comment"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -107,6 +107,10 @@ if ($peerform->intro) {
     echo $OUTPUT->box(format_module_intro('peerform', $peerform, $cm->id), 'generalbox mod_introbox', 'peerformintro');
 }
 
+// Load comment libraries.
+require_once($CFG->dirroot .'/comment/lib.php');
+comment::init();
+
 // Tabs.
 $output->viewtabs($id, $context, $tab);
 

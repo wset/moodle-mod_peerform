@@ -38,12 +38,11 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_peerform_upgrade($oldversion) {
-    global $DB;
+    global $DB, $CFG;
 
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2015021800) {
-
         // Define field reviewself to be added to peerform.
         $table = new xmldb_table('peerform');
         $field = new xmldb_field('reviewself', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'timemodified');
@@ -55,6 +54,55 @@ function xmldb_peerform_upgrade($oldversion) {
 
         // Newmodule savepoint reached.
         upgrade_mod_savepoint(true, 2015021800, 'peerform');
+    }
+
+    if ($oldversion < 2015112500) {
+        require_once(dirname(__FILE__).'/../locallib.php');
+
+        // Get all submissions with comments.
+        $sql = "SELECT * FROM {peerform_submission} ps ".
+            "WHERE ps.comment <> '' ".
+            "ORDER BY modified DESC ";
+        $submissions = $DB->get_records_sql($sql);
+
+        // Foreach submission add comment as new commentlib comment.
+        foreach ($submissions as $submission) {
+            require_once($CFG->dirroot  . '/comment/lib.php');
+            $peerform = $DB->get_record('peerform', array('id' => $submission->peerformid));
+            $course = $DB->get_record('course', array('id' => $peerform->course));
+            $cm = get_coursemodule_from_instance('peerform', $peerform->id, $course->id);
+            $context = context_module::instance($cm->id);
+
+            $cmt = new stdClass();
+            $cmt->context = $context;
+            $cmt->course  = $course;
+            $cmt->cm      = $cm;
+            $cmt->area    = 'peerform_submission';
+            $cmt->itemid  = $submission->id;
+            $cmt->showcount = true;
+            $cmt->component = 'mod_peerform';
+            $comment = new comment($cmt);
+
+            // Newmodule savepoint reached.
+            $comment->add($submission->comment);
+        }
+
+        upgrade_mod_savepoint(true, 2015112500, 'peerform');
+    }
+
+    if ($oldversion < 2015112600) {
+
+        // Define field comment to be dropped from peerform_submission.
+        $table = new xmldb_table('peerform_submission');
+        $field = new xmldb_field('comment');
+
+        // Conditionally launch drop field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Newmodule savepoint reached.
+        upgrade_mod_savepoint(true, 2015112600, 'peerform');
     }
 
     return true;

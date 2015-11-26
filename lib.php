@@ -236,6 +236,9 @@ function peerform_user_complete($course, $user, $mod, $peerform) {
     $context = context_module::instance($mod->id);
     $output = $PAGE->get_renderer('mod_peerform');
 
+    require_once($CFG->dirroot .'/comment/lib.php');
+    comment::init();
+
     // Get Submissions.
     echo '<div class="peerform_submissions">';
     echo "<h5>" . get_string('submissions', 'peerform') . "</h5>";
@@ -340,3 +343,113 @@ function peerform_get_extra_capabilities() {
     return array();
 }
 
+
+/**
+ * Validate comment parameter before perform other comments actions
+ *
+ * @package  mod_data
+ * @category comment
+ *
+ * @param stdClass $comment_param {
+ *              context  => context the context object
+ *              courseid => int course id
+ *              cm       => stdClass course module object
+ *              commentarea => string comment area
+ *              itemid      => int itemid
+ * }
+ * @return boolean
+ */
+function peerform_comment_validate($commentparam) {
+    global $DB;
+    // Validate comment area.
+    if ($commentparam->commentarea != 'peerform_submission') {
+        throw new comment_exception('invalidcommentarea');
+    }
+    // Validate itemid.
+    if (!$submission = $DB->get_record('peerform_submission', array('id' => $commentparam->itemid))) {
+        throw new comment_exception('invalidcommentitemid');
+    }
+    if (!$peerform = $DB->get_record('peerform', array('id' => $submission->peerformid))) {
+        throw new comment_exception('invalidid', 'peerform');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $peerform->course))) {
+        throw new comment_exception('coursemisconf');
+    }
+    if (!$cm = get_coursemodule_from_instance('peerform', $peerform->id, $course->id)) {
+        throw new comment_exception('invalidcoursemodule');
+    }
+
+    $context = context_module::instance($cm->id);
+    // Check if locked.
+    if (!$submission->locked) {
+        throw new comment_exception('notlocked', 'peerform');
+    }
+    // Validate context id.
+    if ($context->id != $commentparam->context->id) {
+        throw new comment_exception('invalidcontext');
+    }
+
+    // Validation for comment deletion.
+    if (!empty($commentparam->commentid)) {
+        if ($comment = $DB->get_record('comments', array('id' => $commentparam->commentid))) {
+            if ($comment->commentarea != 'peerform_submission') {
+                throw new comment_exception('invalidcommentarea');
+            }
+            if ($comment->contextid != $commentparam->context->id) {
+                throw new comment_exception('invalidcontext');
+            }
+            if ($comment->itemid != $commentparam->itemid) {
+                throw new comment_exception('invalidcommentitemid');
+            }
+        } else {
+            throw new comment_exception('invalidcommentid');
+        }
+    }
+    return true;
+}
+
+/**
+ * Running addtional permission check on plugin, for example, plugins
+ * may have switch to turn on/off comments option, this callback will
+ * affect UI display, not like pluginname_comment_validate only throw
+ * exceptions.
+ * Capability check has been done in comment->check_permissions(), we
+ * don't need to do it again here.
+ *
+ * @package  mod_data
+ * @category comment
+ *
+ * @param stdClass $comment_param {
+ *              context  => context the context object
+ *              courseid => int course id
+ *              cm       => stdClass course module object
+ *              commentarea => string comment area
+ *              itemid      => int itemid
+ * }
+ * @return array
+ */
+function peerform_comment_permissions($commentparam) {
+    global $CFG, $DB;
+    if (!$submission = $DB->get_record('peerform_submission', array('id' => $commentparam->itemid))) {
+        throw new comment_exception('invalidcommentitemid');
+    }
+    if (!$peerform = $DB->get_record('peerform', array('id' => $submission->peerformid))) {
+        throw new comment_exception('invalidid', 'peerform');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $peerform->course))) {
+        throw new comment_exception('coursemisconf');
+    }
+    if (!$cm = get_coursemodule_from_instance('peerform', $peerform->id, $course->id)) {
+        throw new comment_exception('invalidcoursemodule');
+    }
+    $context = context_module::instance($cm->id);
+    // Validate context id.
+    if ($context->id != $commentparam->context->id) {
+        throw new comment_exception('invalidcontext');
+    }
+
+    require_once(dirname(__FILE__).'/locallib.php');
+    $post = has_capability('mod/peerform:comment', $context);
+    $ownsubmission = peerformlib::userownssubmission($submission->id);
+    return array('post' => $post, 'view' => true);
+}
