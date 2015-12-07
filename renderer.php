@@ -125,9 +125,10 @@ class mod_peerform_renderer extends plugin_renderer_base {
         global $OUTPUT;
 
         $tabs = array(
-            'all' => get_string('allsubmissions', 'peerform'),
-            'submit' => get_string('mysubmissions', 'peerform'),
-            'reviews' => get_string('reviews', 'peerform')
+            'allsubmissions' => get_string('allsubmissions', 'peerform'),
+            'mysubmissions' => get_string('mysubmissions', 'peerform'),
+            'allreviews' => get_string('allreviews', 'peerform'),
+            'myreviews' => get_string('myreviews', 'peerform')
         );
         if (has_capability('mod/peerform:addinstance', $context)) {
             $tabs['define'] = get_string('define', 'peerform');
@@ -408,7 +409,16 @@ class mod_peerform_renderer extends plugin_renderer_base {
             $reviews = peerformlib::reviews($peerformid);
         }
 
-        echo '<div class="alert alert-info">' . get_string('allreviewsdesc', 'peerform') . '</div>';
+        if ($userid === $USER->id) {
+            echo '<div class="alert alert-info">' . get_string('myreviewsdesc', 'peerform') . '</div>';
+        } else if ($userid) {
+            $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+            $userlink = new moodle_url('/user/view.php', array('id' => $user->id, 'course' => $courseid));
+            $userhtml = "<a href=\"$userlink\">" . fullname($user) . "</a>";
+            echo '<div class="alert alert-info">' . get_string('reviewsbydesc', 'peerform', $userhtml) . '</div>';
+        } else {
+            echo '<div class="alert alert-info">' . get_string('allreviewsdesc', 'peerform') . '</div>';
+        }
 
         // Display.
         if (!$reviews) {

@@ -29,7 +29,7 @@ $id = optional_param('id', 0, PARAM_INT); // Course module ID.
 $p  = optional_param('p', 0, PARAM_INT);  // Newmodule instance ID - it should be named as the first character of the module.
 $up = optional_param('up', 0, PARAM_INT);
 $down = optional_param('down', 0, PARAM_INT);
-$tab = optional_param('tab', 'all', PARAM_ALPHA);
+$tab = optional_param('tab', 'allsubmissions', PARAM_ALPHA);
 $submissionid = optional_param('submission', 0, PARAM_INT);
 $reviewid = optional_param('review', 0, PARAM_INT);
 $page = optional_param('page', 0, PARAM_INT);
@@ -124,9 +124,9 @@ if (($tab == 'define') && has_capability('mod/peerform:addinstance', $context)) 
     $output->define_button($peerform->id);
 }
 
-// TAB == SUBMIT
-// Show option to submit (or edit) form to 'students'.
-if ($tab == 'submit') {
+// TAB == MY SUBMISSIONS
+// Show current user's submissions.
+if ($tab == 'mysubmissions') {
     if ($submissionid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         if ($reviewid) {
@@ -142,9 +142,9 @@ if ($tab == 'submit') {
     }
 }
 
-// TAB == ALL
-// Show options to review.
-if ($tab == 'all') {
+// TAB == ALL SUBMISSIONS
+// Show latest submissions.
+if ($tab == 'allsubmissions') {
     if ($submissionid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         if ($reviewid) {
@@ -160,15 +160,27 @@ if ($tab == 'all') {
     }
 }
 
-// TAB = REVIEW
+// TAB = ALL REVIEWS
 // Show latest reviews.
-if ($tab == 'reviews') {
+if ($tab == 'allreviews') {
     if ($submissionid && $reviewid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         $output->viewsubmission($peerform->id, $reviewid, $context, $page);
         $output->backtoallreviews($cm->id, $page);
     } else {
         $output->allreviews($cm->id, $course->id, $peerform->id, $page);
+    }
+}
+
+// TAB = MY REVIEWS
+// Show current user's reviews
+if ($tab == 'myreviews') {
+    if ($submissionid && $reviewid) {
+        $output->viewsubmission($peerform->id, $submissionid, $context);
+        $output->viewsubmission($peerform->id, $reviewid, $context, $page);
+        $output->backtoallreviews($cm->id, $page);
+    } else {
+        $output->allreviews($cm->id, $course->id, $peerform->id, $page, $USER->id);
     }
 }
 
