@@ -5,3 +5,49 @@
 #page-report-outline-user .peerform_submissions .peerform_submission h3, #page-report-outline-user .peerform_reviews .peerform_review h3 {
     display: none;
 }
+
+.jsenabled .peerform-reviewviewsubnonjs, .jsenabled .peerform-review-table .peerform-review-viewnojs {
+    display: none;
+}
+
+.peerform-review-submission-link, .peerform-review-table .peerform-review-viewjs {
+    display: none;
+}
+
+.jsenabled .peerform-review-submission-link {
+    display: block;
+}
+
+.jsenabled .peerform-review-table .peerform-review-viewjs  {
+    display: table-cell;
+}
+
+.peerform-review-submission-ctrl {
+    display: none;
+}
+
+.peerform-review-user {
+    display: inline-block;
+}
+
+.peerform-review-date {
+    float: right;
+    width: 50ex;
+}
+
+.peerform-review-content-ctrl {
+    clear: both;
+    margin-top: 2em;
+    display: none;
+}
+
+.peerform-review-header, .peerform-review-link {
+    cursor: pointer;
+}
+
+.peerform-submission-full, .peerform_subreview {
+    border: 1px solid grey;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}

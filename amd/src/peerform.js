@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,19 +13,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * This code fragment is called by moodle_needs_upgrading() and
- * /admin/index.php
+ * Peerform Javascript
  *
  * @package    mod_peerform
- * @copyright  2013 Howard Miller
+ * @copyright  2015 Owen Barritt, Wine & Spirit Education Trust
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+ define(['jquery'], function($) {
+    return {
+        addSubsToggleListener: function(link, content, img) {
+            $('#' + link).on('click', function(event){
+                event.preventDefault();
+                $('#' + content).toggle();
 
-$module->version   = 2015120700;
-$module->requires  = 2015051100;
-$module->cron      = 1;
-$module->component = 'mod_peerform';
+                if($('#' + content).css('display') == 'none') {
+                    $('#' + img).attr('src', M.util.image_url('t/collapsed', 'core'));
+                } else {
+                    $('#' + img).attr('src', M.util.image_url('t/expanded', 'core'));
+                }
+            });
+
+            $('#' + link + '> a').on('click', function(event){
+                event.stopPropagation();
+            });
+        }
+    };
+ });

@@ -165,9 +165,18 @@ class peerformlib {
         }
 
         $reviews = $DB->get_records('peerform_submission',
-            array('peerformid' => $peerformid, 'userid' => $userid, 'review' => 1));
+            array('peerformid' => $peerformid, 'userid' => $userid, 'review' => 1), 'modified DESC');
 
-        return $reviews;
+        // We do not want ones with locked parents.
+        $filteredreviews = array();
+        foreach ($reviews as $id => $review) {
+            $parent = $DB->get_record('peerform_submission', array('id' => $review->parentid), '*', MUST_EXIST);
+            if ($parent->locked || self::userownssubmission($parent->id)) {
+                $filteredreviews[$id] = $review;
+            }
+        }
+
+        return $filteredreviews;
     }
 
 

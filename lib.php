@@ -242,30 +242,13 @@ function peerform_user_complete($course, $user, $mod, $peerform) {
     // Get Submissions.
     echo '<div class="peerform_submissions">';
     echo "<h5>" . get_string('submissions', 'peerform') . "</h5>";
-    $submissions = peerformlib::mysubmissions($peerform->id, $user->id);
-    if (!empty($submissions)) {
-        foreach ($submissions as $submission) {
-            $output->viewsubmission($peerform->id, $submission->id, $context);
-        }
-    } else {
-        echo '<p>' . get_string('nosubmissions', 'peerform') . '</p>';
-    }
+    $output->allsubmissions($mod->id, $course->id, $peerform->id, 0, $user->id, false);
     echo '</div>';
 
     echo '<div class="peerform_reviews">';
     // Get Reviews.
     echo "<h5>" . get_string('reviews', 'peerform') . "</h5>";
-    $reviews = peerformlib::myreviews($peerform->id, $user->id);
-    if (!empty($reviews)) {
-        foreach ($reviews as $review) {
-            echo '<div class="peerform_subrev">';
-            $output->viewsubmission($peerform->id, $review->parentid, $context);
-            $output->viewsubmission($peerform->id, $review->id, $context);
-            echo '</div>';
-        }
-    } else {
-        echo '<p>' . get_string('noreviewsoverall', 'peerform') . '</p>';
-    }
+    $output->allreviews($mod->id, $course->id, $peerform->id, 0, $user->id, false);
     echo '</div>';
 }
 

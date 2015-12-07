@@ -135,14 +135,11 @@ if (($tab == 'submit') && has_capability('mod/peerform:submit', $context)) {
             $output->backtosubmissionreviews($cm->id, $submissionid);
         } else {
             $output->reviews($cm->id, $course->id, $peerform->id, $submissionid, $context);
-            if ($submission->locked || peerformlib::userownssubmission($submissionid)) {
-                $output->submitreviewlink($peerform->id, $submissionid);
-            }
             $output->backtosubmissions($cm->id);
         }
     } else {
-        $output->mysubmissions($cm->id, $peerform->id, $submissions, $context);
         $output->submitlink($peerform->id);
+        $output->allsubmissions($cm->id, $course->id, $peerform->id, $page, $USER->id);
     }
 }
 
@@ -156,15 +153,11 @@ if (($tab == 'all') && (has_capability('mod/peerform:review', $context) || has_c
             $output->backtosubmissionreviews($cm->id, $submissionid);
         } else {
             $output->reviews($cm->id, $course->id, $peerform->id, $submissionid, $context);
-            if (($submission->locked && has_capability('mod/peerform:review', $context))
-                    || peerformlib::userownssubmission($submissionid)) {
-                $output->submitreviewlink($peerform->id, $submissionid);
-            }
             $output->backtoreviews($cm->id, $page);
         }
     } else {
-        $output->allsubmissions($cm->id, $course->id, $peerform->id, $page);
         $output->submitlink($peerform->id);
+        $output->allsubmissions($cm->id, $course->id, $peerform->id, $page);
     }
 }
 
@@ -174,7 +167,7 @@ if (($tab == 'reviews') && (has_capability('mod/peerform:review', $context) || h
     if ($submissionid && $reviewid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         $output->viewsubmission($peerform->id, $reviewid, $context, $page);
-        $output->backtoallreviews($cm->id);
+        $output->backtoallreviews($cm->id, $page);
     } else {
         $output->allreviews($cm->id, $course->id, $peerform->id, $page);
     }
