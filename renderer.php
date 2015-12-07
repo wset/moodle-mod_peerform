@@ -87,12 +87,14 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * Create submit form link
      * @param int $id Peerform id
      */
-    public function submitlink($id) {
-        if (peerformlib::fieldsdefined($id)) {
-            $submiturl = new moodle_url('/mod/peerform/submit.php', array('id' => $id));
-            echo "<div><a class=\"btn btn-success\" href=\"$submiturl\">" . get_string('submitform', 'peerform') . '</a></div>';
-        } else {
-            echo '<div class="alert alert-danger">' . get_string('activitynotconfigured', 'peerform') . '</div>';
+    public function submitlink($peerformid, $context) {
+        if (has_capability('mod/peerform:submit', $context)) {
+            if (peerformlib::fieldsdefined($peerformid)) {
+                $submiturl = new moodle_url('/mod/peerform/submit.php', array('id' => $peerformid));
+                echo "<p><a class=\"btn btn-success\" href=\"$submiturl\">" . get_string('submitform', 'peerform') . '</a></p>';
+            } else {
+                echo '<div class="alert alert-danger">' . get_string('activitynotconfigured', 'peerform') . '</div>';
+            }
         }
     }
 
@@ -100,13 +102,16 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * Create submit review form link
      * @param int $id Peerform id
      */
-    public function submitreviewlink($id, $submissionid) {
-        if (peerformlib::fieldsdefined($id, true)) {
-            $submiturl = new moodle_url('/mod/peerform/submit.php',
-                    array('id' => $id, 'parent' => $submissionid, 'review' => 1, 'tab' => 'review'));
-            echo "<p><a class=\"btn btn-success\" href=\"$submiturl\">" . get_string('submitreviewform', 'peerform') . '</a></p>';
-        } else {
-            echo '<div class="alert alert-warning">' . get_string('activitynotconfigured', 'peerform') . '</div>';
+    public function submitreviewlink($peerformid, $submissionid, $context) {
+        if (has_capability('mod/peerform:review', $context)) {
+            if (peerformlib::fieldsdefined($peerformid, true)) {
+                $submiturl = new moodle_url('/mod/peerform/submit.php',
+                        array('id' => $peerformid, 'parent' => $submissionid, 'review' => 1, 'tab' => 'review'));
+                echo "<p><a class=\"btn btn-success\" href=\"$submiturl\">" . get_string('submitreviewform', 'peerform')
+                        . '</a></p>';
+            } else {
+                echo '<div class="alert alert-warning">' . get_string('activitynotconfigured', 'peerform') . '</div>';
+            }
         }
     }
 
@@ -119,16 +124,11 @@ class mod_peerform_renderer extends plugin_renderer_base {
     public function viewtabs($cmid, $context, $selected) {
         global $OUTPUT;
 
-        $tabs = array();
-        if (has_capability('mod/peerform:review', $context) || has_capability('mod/peerform:comment', $context)) {
-            $tabs['all'] = get_string('allsubmissions', 'peerform');
-        }
-        if (has_capability('mod/peerform:submit', $context)) {
-            $tabs['submit'] = get_string('mysubmissions', 'peerform');
-        }
-        if (has_capability('mod/peerform:review', $context) || has_capability('mod/peerform:comment', $context)) {
-            $tabs['reviews'] = get_string('reviews', 'peerform');
-        }
+        $tabs = array(
+            'all' => get_string('allsubmissions', 'peerform'),
+            'submit' => get_string('mysubmissions', 'peerform'),
+            'reviews' => get_string('reviews', 'peerform')
+        );
         if (has_capability('mod/peerform:addinstance', $context)) {
             $tabs['define'] = get_string('define', 'peerform');
         }
@@ -614,7 +614,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
 
         if (($parentsubmission->locked || peerformlib::userownssubmission($submissionid))
                 && !peerformlib::userhasreviewed($submissionid) ) {
-            $this->submitreviewlink($peerformid, $submissionid);
+            $this->submitreviewlink($peerformid, $submissionid, $context);
         }
     }
 
