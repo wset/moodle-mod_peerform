@@ -35,7 +35,7 @@
                 }
             });
 
-            $('#' + link + '> a').on('click', function(event){
+            $('#' + link).find('a').on('click', function(event){
                 event.stopPropagation();
             });
         }
