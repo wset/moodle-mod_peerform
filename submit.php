@@ -132,7 +132,7 @@ if ($mform->is_cancelled()) {
     $event->trigger();
 
     if ($review) {
-        redirect(new moodle_url('/mod/peerform/view.php', array('id' => $cm->id, 'tab' => 'all', 'submission' => $parentid)));
+        redirect(new moodle_url('/mod/peerform/view.php', array('id' => $cm->id, 'tab' => 'allsubmissions', 'submission' => $parentid)));
     } else {
 
         // If this was a new submission they have the option to review (themselves) immediately.
@@ -143,7 +143,7 @@ if ($mform->is_cancelled()) {
             die;
         } else {
             redirect(new moodle_url('/mod/peerform/view.php',
-                array('id' => $cm->id, 'tab' => 'submit', 'submission' => $submissionid)));
+                array('id' => $cm->id, 'tab' => 'mysubmissions', 'submission' => $submissionid)));
         }
     }
 } else {

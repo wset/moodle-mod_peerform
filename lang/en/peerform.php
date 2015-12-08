@@ -35,6 +35,7 @@ $string['commentform'] = 'Comment on submission';
 $string['confirmreview'] = 'You now have the option to review your own submission. Just click \'Skip\' if you don\'t want to do so now.';
 $string['backtoallreviews'] = 'Back to all reviews';
 $string['backtoreviews'] = 'Back to reviews';
+$string['backtomyreviews'] = 'Back to my reviews';
 $string['backtosubmissions'] = 'Back to submissions';
 $string['datesubmitted'] = 'Submitted at';
 $string['define'] = 'Define';

@@ -249,7 +249,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * @param int $cmid
      */
     public function backtosubmissions($cmid) {
-        $backlink = new moodle_url('/mod/peerform/view.php', array('tab' => 'submit', 'id' => $cmid));
+        $backlink = new moodle_url('/mod/peerform/view.php', array('tab' => 'mysubmissions', 'id' => $cmid));
         $back = "<a class=\"btn btn-success\" href=\"$backlink\">" . get_string('backtosubmissions', 'peerform') . "<a>";
         echo "<div>$back</div>";
     }
@@ -260,7 +260,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * @paam int $page current page number
      */
     public function backtoreviews($cmid, $page = 0) {
-        $backlink = new moodle_url('/mod/peerform/view.php', array('tab' => 'all', 'id' => $cmid, 'page' => $page));
+        $backlink = new moodle_url('/mod/peerform/view.php', array('tab' => 'allsubmissions', 'id' => $cmid, 'page' => $page));
         $back = "<a class=\"btn btn-success\" href=\"$backlink\">" . get_string('backtosubmissions', 'peerform') . "<a>";
         echo "<div>$back</div>";
     }
@@ -275,11 +275,18 @@ class mod_peerform_renderer extends plugin_renderer_base {
 
     public function backtoallreviews($cmid, $page = 0) {
         $backlink = new moodle_url('/mod/peerform/view.php',
-                array('tab' => 'reviews', 'id' => $cmid, 'page' => $page));
+                array('tab' => 'allreviews', 'id' => $cmid, 'page' => $page));
         $back = "<a class=\"btn btn-success\" href=\"$backlink\">" . get_string('backtoallreviews', 'peerform') . "<a>";
         echo "<div>$back</div>";
     }
 
+    public function backtomyreviews($cmid, $page = 0) {
+        $backlink = new moodle_url('/mod/peerform/view.php',
+                array('tab' => 'myreviews', 'id' => $cmid, 'page' => $page));
+        $back = "<a class=\"btn btn-success\" href=\"$backlink\">" . get_string('backtomyreviews', 'peerform') . "<a>";
+        echo "<div>$back</div>";
+    }    
+    
     /**
      * Show table of all submissions
      * (i.e. available for review)
@@ -548,78 +555,77 @@ class mod_peerform_renderer extends plugin_renderer_base {
             has_capability('mod/peerform:viewunreviewed', $context);
         if (!$canview) {
              echo '<div class="alert alert-warning">' . get_string('notreviewed', 'peerform') . '</div>';
-             return;
-        }
-
-        // Is there anything to display.
-        if (!$submissions) {
-            echo '<div class="alert alert-warning">' . get_string('noreviews', 'peerform') . '</div>';
         } else {
-            echo '<div class="alert alert-info">' . get_string('reviewsdesc', 'peerform') . '</div>';
-
-            $collapsedimage = 't/collapsed';
-            if (right_to_left()) {
-                $collapsedimage = 't/collapsed_rtl';
+            // Is there anything to display.
+            if (!$submissions) {
+                echo '<div class="alert alert-warning">' . get_string('noreviews', 'peerform') . '</div>';
             } else {
+                echo '<div class="alert alert-info">' . get_string('reviewsdesc', 'peerform') . '</div>';
+
                 $collapsedimage = 't/collapsed';
-            }
-
-            $table = new html_table();
-            $table->colclasses = array('peerform-review-viewjs', null, 'peerform-review-viewnojs');
-            $table->attributes['class'] = 'generaltable peerform-review-table';
-
-            foreach ($submissions as $submission) {
-                $tab = $ownsubmission ? 'submit' : 'all';
-                $viewlink = new moodle_url('/mod/peerform/view.php',
-                        array('id' => $cmid, 'submission' => $submissionid, 'review' => $submission->id, 'tab' => $tab));
-                $viewhtml = "<a href=\"$viewlink\">" . get_string('view', 'peerform') . "</a>";
-
-                $jsviewhtml = new html_table_cell;
-                $jsviewhtml->id = 'peerform-review-link-'.$submission->id;
-                $jsviewhtml->attributes['class'] = 'peerform-review-link';
-                $jsviewhtml->text = html_writer::empty_tag('img', array('id' => 'peerform-review-img-'.$submission->id,
-                        'src' => $OUTPUT->pix_url($collapsedimage), 'alt' => get_string('submission', 'peerform'),
-                        'title' => get_string('submission', 'peerform')));
-                $user = $DB->get_record('user', array('id' => $submission->userid), '*', MUST_EXIST);
-                if ($user->id == $USER->id) {
-                    $userhtml = get_string('me', 'peerform');
+                if (right_to_left()) {
+                    $collapsedimage = 't/collapsed_rtl';
                 } else {
-                    $userlink = new moodle_url('/user/view.php', array('id' => $user->id, 'course' => $courseid));
-                    $userhtml = "<a href=\"$userlink\">" . fullname($user) . "</a>";
+                    $collapsedimage = 't/collapsed';
                 }
 
-                $rowcontent = html_writer::start_tag('div', array('id' => 'peerform-review-header-'. $submission->id,
-                        'class' => 'peerform-review-header', 'href' => '#'));
-                $rowcontent .= html_writer::tag('div', $userhtml, array('class' => 'peerform-review-user'));
-                $rowcontent .= html_writer::tag('div', userdate($submission->modified), array('class' => 'peerform-review-date'));
-                $rowcontent .= html_writer::end_tag('div');
+                $table = new html_table();
+                $table->colclasses = array('peerform-review-viewjs', null, 'peerform-review-viewnojs');
+                $table->attributes['class'] = 'generaltable peerform-review-table';
 
-                $subcontent = $this->viewsubmission($peerformid, $submission->id, $context, 0, false);
+                foreach ($submissions as $submission) {
+                    $tab = $ownsubmission ? 'submit' : 'all';
+                    $viewlink = new moodle_url('/mod/peerform/view.php',
+                            array('id' => $cmid, 'submission' => $submissionid, 'review' => $submission->id, 'tab' => $tab));
+                    $viewhtml = "<a href=\"$viewlink\">" . get_string('view', 'peerform') . "</a>";
 
-                $rowcontent .= html_writer::tag('div', $subcontent, array('class' => 'peerform-review-content-ctrl',
-                        'id' => 'peerform-review-content-ctrl'.$submission->id));
+                    $jsviewhtml = new html_table_cell;
+                    $jsviewhtml->id = 'peerform-review-link-'.$submission->id;
+                    $jsviewhtml->attributes['class'] = 'peerform-review-link';
+                    $jsviewhtml->text = html_writer::empty_tag('img', array('id' => 'peerform-review-img-'.$submission->id,
+                            'src' => $OUTPUT->pix_url($collapsedimage), 'alt' => get_string('submission', 'peerform'),
+                            'title' => get_string('submission', 'peerform')));
+                    $user = $DB->get_record('user', array('id' => $submission->userid), '*', MUST_EXIST);
+                    if ($user->id == $USER->id) {
+                        $userhtml = get_string('me', 'peerform');
+                    } else {
+                        $userlink = new moodle_url('/user/view.php', array('id' => $user->id, 'course' => $courseid));
+                        $userhtml = "<a href=\"$userlink\">" . fullname($user) . "</a>";
+                    }
 
-                $this->page->requires->js_call_amd('mod_peerform/peerform', 'addSubsToggleListener',
-                        array('peerform-review-header-'.$submission->id, 'peerform-review-content-ctrl'.$submission->id,
-                        'peerform-review-img-'.$submission->id));
-                $this->page->requires->js_call_amd('mod_peerform/peerform', 'addSubsToggleListener',
-                        array('peerform-review-link-'.$submission->id, 'peerform-review-content-ctrl'.$submission->id,
-                        'peerform-review-img-'.$submission->id));
+                    $rowcontent = html_writer::start_tag('div', array('id' => 'peerform-review-header-'. $submission->id,
+                            'class' => 'peerform-review-header', 'href' => '#'));
+                    $rowcontent .= html_writer::tag('div', $userhtml, array('class' => 'peerform-review-user'));
+                    $rowcontent .= html_writer::tag('div', userdate($submission->modified), array('class' => 'peerform-review-date'));
+                    $rowcontent .= html_writer::end_tag('div');
 
-                $row = new html_table_row;
+                    $subcontent = $this->viewsubmission($peerformid, $submission->id, $context, 0, false);
 
-                $row->cells = array(
-                    $jsviewhtml,
-                    $rowcontent,
-                    $viewhtml,
-                );
+                    $rowcontent .= html_writer::tag('div', $subcontent, array('class' => 'peerform-review-content-ctrl',
+                            'id' => 'peerform-review-content-ctrl'.$submission->id));
 
-                $row->id = 'peerform-review-row-'.$submission->id;
+                    $this->page->requires->js_call_amd('mod_peerform/peerform', 'addSubsToggleListener',
+                            array('peerform-review-header-'.$submission->id, 'peerform-review-content-ctrl'.$submission->id,
+                            'peerform-review-img-'.$submission->id));
+                    $this->page->requires->js_call_amd('mod_peerform/peerform', 'addSubsToggleListener',
+                            array('peerform-review-link-'.$submission->id, 'peerform-review-content-ctrl'.$submission->id,
+                            'peerform-review-img-'.$submission->id));
 
-                $table->rowclasses[] = 'peerform-review-row';
-                $table->data[] = $row;
+                    $row = new html_table_row;
+
+                    $row->cells = array(
+                        $jsviewhtml,
+                        $rowcontent,
+                        $viewhtml,
+                    );
+
+                    $row->id = 'peerform-review-row-'.$submission->id;
+
+                    $table->rowclasses[] = 'peerform-review-row';
+                    $table->data[] = $row;
+                }
+                echo html_writer::table($table);
             }
-            echo html_writer::table($table);
         }
 
         if (($parentsubmission->locked || peerformlib::userownssubmission($submissionid))
@@ -641,7 +647,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
         $reviewlink = new moodle_url('/mod/peerform/submit.php',
             array('id' => $peerformid, 'parent' => $submissionid, 'review' => 1));
         echo '<a class="btn btn-success" href="' . $reviewlink . '">' . get_string('reviewself', 'peerform') . '</a>';
-        $cancellink = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => 'submit'));
+        $cancellink = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => 'mysubmissions'));
         echo '&nbsp;<a class="btn btn-warning" href="' . $cancellink . '">' . get_string('skip', 'peerform') . '</a>';
         echo '</div>';
     }

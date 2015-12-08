@@ -178,7 +178,7 @@ if ($tab == 'myreviews') {
     if ($submissionid && $reviewid) {
         $output->viewsubmission($peerform->id, $submissionid, $context);
         $output->viewsubmission($peerform->id, $reviewid, $context, $page);
-        $output->backtoallreviews($cm->id, $page);
+        $output->backtomyreviews($cm->id, $page);
     } else {
         $output->allreviews($cm->id, $course->id, $peerform->id, $page, $USER->id);
     }
