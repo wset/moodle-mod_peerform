@@ -121,7 +121,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
      * @param object $context the course context
      * @param string $selected currently selected tab
      */
-    public function viewtabs($cmid, $context, $selected) {
+    public function viewtabs($cmid, $context, $selected, $linkcurrent = false) {
         global $OUTPUT;
 
         $tabs = array(
@@ -140,7 +140,9 @@ class mod_peerform_renderer extends plugin_renderer_base {
             $rows[] = new tabobject(
                 $key,
                 new moodle_url('/mod/peerform/view.php', array('tab' => $key, 'id' => $cmid)),
-                $tab
+                $tab,
+                $tab,
+                $linkcurrent
             );
         }
         echo $OUTPUT->tabtree($rows, $selected);

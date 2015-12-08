@@ -112,7 +112,7 @@ require_once($CFG->dirroot .'/comment/lib.php');
 comment::init();
 
 // Tabs.
-$output->viewtabs($id, $context, $tab);
+$output->viewtabs($id, $context, $tab, isset($submission));
 
 // TAB == DEFINE
 // Show defined form elements to 'teachers'.
