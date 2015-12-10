@@ -64,6 +64,11 @@ function xmldb_peerform_upgrade($oldversion) {
             "WHERE ps.comment <> '' ".
             "ORDER BY modified DESC ";
         $submissions = $DB->get_records_sql($sql);
+        
+        if( defined('CLI_SCRIPT') && CLI_SCRIPT ) {
+            // log in as admin if upgrading on command line to ensure we can write comments.
+            \core\session\manager::set_user(get_admin());
+        }
 
         // Foreach submission add comment as new commentlib comment.
         foreach ($submissions as $submission) {
