@@ -332,7 +332,12 @@ class mod_peerform_renderer extends plugin_renderer_base {
         }
 
         // Prepare paging bar.
-        $baseurl = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => 'all', 'page' => $page));
+        if ($userid) {
+            $tab = 'mysubmissions';
+        } else {
+            $tab = 'allsubmissions';
+        }
+        $baseurl = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => $tab, 'page' => $page));  
         $perpage = SUBMISSIONS_PERPAGE;
         $pagingbar = new paging_bar(
             count($submissions),
@@ -380,6 +385,7 @@ class mod_peerform_renderer extends plugin_renderer_base {
             echo '</div>';
             $count++;
         }
+        echo $this->render($pagingbar);
     }
 
     /**
@@ -436,7 +442,12 @@ class mod_peerform_renderer extends plugin_renderer_base {
         }
 
         // Prepare paging bar.
-        $baseurl = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => 'reviews', 'page' => $page));
+        if ($userid) {
+            $tab = 'myreviews';
+        } else {
+            $tab = 'allreviews';
+        }
+        $baseurl = new moodle_url('/mod/peerform/view.php', array('id' => $cmid, 'tab' => $tab, 'page' => $page));        
         $perpage = SUBMISSIONS_PERPAGE;
         $pagingbar = new paging_bar(
             count($reviews),
